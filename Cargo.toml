@@ -1,9 +1,2 @@
-[package]
-name = "simt"
-version = "0.0.1"
-edition = "2021"
-license = "MIT"
-description = "simple simt compute support for rust"
-authors = ["Mack Straight <mack@str.rs>"]
-
-[dependencies]
+[workspace]
+members = ["simt", "simt_cuda_sys"]

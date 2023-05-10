@@ -1,0 +1,9 @@
+[package]
+name = "simt_cuda_sys"
+version = "0.1.0"
+edition = "2021"
+description = "part of simt. cuda driver api bindings"
+authors = ["Mack Straight <mack@str.rs>"]
+
+[dependencies]
+libloading = "0.8.0"
