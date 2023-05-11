@@ -1,0 +1,9 @@
+[package]
+name = "simt_cuda"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "part of simt. cuda backend"
+authors = ["Mack Straight <mack@str.rs>"]
+
+[dependencies]
