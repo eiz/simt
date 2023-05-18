@@ -315,10 +315,10 @@ impl Drop for HipStream {
 
 #[derive(Default, Clone)]
 pub struct LaunchParams<'a> {
-    blocks: (u32, u32, u32),
-    threads: (u32, u32, u32),
-    shared_mem: u32,
-    stream: Option<&'a HipStream>,
+    pub blocks: (u32, u32, u32),
+    pub threads: (u32, u32, u32),
+    pub shared_mem: u32,
+    pub stream: Option<&'a HipStream>,
 }
 
 pub trait KernelParam {
