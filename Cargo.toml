@@ -1,2 +1,9 @@
 [workspace]
-members = ["simt", "simt_cuda", "simt_cuda_sys", "simt_hip_sys", "simt_vulkan"]
+members = [
+    "simt",
+    "simt_cuda",
+    "simt_cuda_sys",
+    "simt_hip",
+    "simt_hip_sys",
+    "simt_vulkan",
+]

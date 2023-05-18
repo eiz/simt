@@ -1,0 +1,10 @@
+[package]
+name = "simt_hip"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "part of simt. amd rocm/hip backend"
+authors = ["Mack Straight <mack@str.rs>"]
+
+[dependencies]
+simt_hip_sys = "0.1.2"
