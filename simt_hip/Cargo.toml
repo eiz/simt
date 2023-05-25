@@ -1,11 +1,12 @@
 [package]
 name = "simt_hip"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 license = "MIT"
 description = "part of simt. amd rocm/hip backend"
 authors = ["Mack Straight <mack@str.rs>"]
 
 [dependencies]
+half = "2.2.1"
 simt_hip_sys = "0.1.2"
 thiserror = "1"
