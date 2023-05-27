@@ -28,7 +28,7 @@ pub enum Error {
 type Result<T> = core::result::Result<T, Error>;
 
 #[inline(always)]
-unsafe fn hip_call<F: FnOnce() -> simt_hip_sys::hipError_t>(cb: F) -> Result<()> {
+pub unsafe fn hip_call<F: FnOnce() -> simt_hip_sys::hipError_t>(cb: F) -> Result<()> {
     let res = cb();
     if res == simt_hip_sys::hipError_t::hipSuccess {
         Ok(())
@@ -38,7 +38,9 @@ unsafe fn hip_call<F: FnOnce() -> simt_hip_sys::hipError_t>(cb: F) -> Result<()>
 }
 
 #[inline(always)]
-unsafe fn hip_result_call<T, F: FnOnce(*mut T) -> simt_hip_sys::hipError_t>(cb: F) -> Result<T> {
+pub unsafe fn hip_result_call<T, F: FnOnce(*mut T) -> simt_hip_sys::hipError_t>(
+    cb: F,
+) -> Result<T> {
     let mut out = std::mem::MaybeUninit::uninit();
     let res = cb(out.as_mut_ptr());
     if res == simt_hip_sys::hipError_t::hipSuccess {
