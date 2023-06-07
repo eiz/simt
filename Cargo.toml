@@ -5,5 +5,6 @@ members = [
     "simt_cuda_sys",
     "simt_hip",
     "simt_hip_sys",
+    "simt_rocblas_sys",
     "simt_vulkan",
 ]
