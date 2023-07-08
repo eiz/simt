@@ -7,3 +7,6 @@ description = "part of simt. cuda backend"
 authors = ["Mack Straight <mack@str.rs>"]
 
 [dependencies]
+half = "2.3.1"
+simt_cuda_sys = { version = "0.1.2", path = "../simt_cuda_sys" }
+thiserror = "1"
