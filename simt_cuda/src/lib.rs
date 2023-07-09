@@ -1,10 +1,7 @@
 use alloc::{ffi::CString, sync::Arc};
-use core::{
-    cell::RefCell,
-    ffi::{c_void, CStr},
-    marker::PhantomData,
-};
-use half::f16;
+use core::{cell::RefCell, ffi::CStr, marker::PhantomData};
+
+use simt_core::KernelParam;
 use std::sync::Once;
 use thiserror::Error;
 
@@ -321,39 +318,19 @@ impl Drop for CudaStream {
 }
 
 #[derive(Default, Clone)]
-pub struct LaunchParams<'a> {
+pub struct CudaLaunchParams<'a> {
     pub blocks: (u32, u32, u32),
     pub threads: (u32, u32, u32),
     pub shared_mem: u32,
     pub stream: Option<&'a CudaStream>,
 }
 
-pub trait KernelParam {
-    fn to_launch_arg(&self) -> *mut c_void {
-        self as *const _ as *mut _
-    }
-}
-
-impl<T: KernelParam> KernelParam for *mut T {}
-impl<T: KernelParam> KernelParam for *const T {}
-impl KernelParam for f16 {}
-impl KernelParam for f32 {}
-impl KernelParam for f64 {}
-impl KernelParam for u8 {}
-impl KernelParam for u16 {}
-impl KernelParam for u32 {}
-impl KernelParam for u64 {}
-impl KernelParam for i8 {}
-impl KernelParam for i16 {}
-impl KernelParam for i32 {}
-impl KernelParam for i64 {}
-
-pub struct Kernel<T> {
+pub struct CudaKernel<T> {
     ptr: simt_cuda_sys::CUfunction,
     _dead: PhantomData<T>,
 }
 
-impl<T> Kernel<T> {
+impl<T> CudaKernel<T> {
     pub fn new(module: &CudaModule, name: &str) -> Result<Self> {
         let cuda = simt_cuda_sys::library();
         let c_name = CString::new(name).map_err(|_| Error::InvalidKernelName)?;
@@ -375,10 +352,10 @@ impl<T> Kernel<T> {
 // that would be mildly inconvenient
 macro_rules! impl_kernel {
     (($($ty_param:ident),*), ($($ty_idx:tt),*)) => {
-        impl<$($ty_param: KernelParam),*> Kernel<($($ty_param),*,)> {
+        impl<$($ty_param: KernelParam),*> CudaKernel<($($ty_param),*,)> {
             pub fn launch(
                 &self,
-                launch_params: LaunchParams,
+                launch_params: CudaLaunchParams,
                 params: ($($ty_param),*,),
             ) -> Result<()> {
                 let cuda = simt_cuda_sys::library();

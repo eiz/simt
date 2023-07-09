@@ -1,0 +1,10 @@
+[package]
+name = "simt_core"
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+description = "part of simt. shared types between backends"
+authors = ["Mack Straight <mack@str.rs>"]
+
+[dependencies]
+half = "2.3.1"

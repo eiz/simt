@@ -1,8 +1,9 @@
+use alloc::sync::Arc;
 use core::cell::Cell;
 
-use alloc::sync::Arc;
-use simt_cuda::{CudaDevice, CudaPhysicalDevice, ScopedCudaDevice};
-use simt_hip::{HipDevice, HipPhysicalDevice, ScopedHipDevice};
+use simt_core::KernelParam;
+use simt_cuda::{CudaDevice, CudaKernel, CudaLaunchParams, CudaPhysicalDevice, ScopedCudaDevice};
+use simt_hip::{HipDevice, HipKernel, HipLaunchParams, HipPhysicalDevice, ScopedHipDevice};
 use thiserror::Error;
 
 extern crate alloc;
@@ -284,3 +285,155 @@ impl GpuStream {
         }
     }
 }
+
+#[derive(Default, Clone)]
+pub struct LaunchParams<'a> {
+    pub blocks: (u32, u32, u32),
+    pub threads: (u32, u32, u32),
+    pub shared_mem: u32,
+    pub stream: Option<&'a GpuStream>,
+}
+
+impl<'a> Into<CudaLaunchParams<'a>> for LaunchParams<'a> {
+    fn into(self) -> CudaLaunchParams<'a> {
+        CudaLaunchParams {
+            blocks: self.blocks,
+            threads: self.threads,
+            shared_mem: self.shared_mem,
+            stream: self.stream.map(|stream| match stream {
+                GpuStream::Cuda(stream) => stream,
+                GpuStream::Hip(_) => panic!("expected cuda stream, got hip stream"),
+            }),
+        }
+    }
+}
+
+impl<'a> Into<HipLaunchParams<'a>> for LaunchParams<'a> {
+    fn into(self) -> HipLaunchParams<'a> {
+        HipLaunchParams {
+            blocks: self.blocks,
+            threads: self.threads,
+            shared_mem: self.shared_mem,
+            stream: self.stream.map(|stream| match stream {
+                GpuStream::Cuda(_) => panic!("expected hip stream, got cuda stream"),
+                GpuStream::Hip(stream) => stream,
+            }),
+        }
+    }
+}
+
+pub enum Kernel<T> {
+    Cuda(simt_cuda::CudaKernel<T>),
+    Hip(simt_hip::HipKernel<T>),
+}
+
+impl<T> Kernel<T> {
+    pub fn new(module: &GpuModule, name: &str) -> Result<Self> {
+        match module {
+            GpuModule::Cuda(module) => Ok(Self::Cuda(CudaKernel::new(module, name)?)),
+            GpuModule::Hip(module) => Ok(Self::Hip(HipKernel::new(module, name)?)),
+        }
+    }
+}
+
+macro_rules! impl_kernel {
+    (($($ty_param:ident),*), ($($ty_idx:tt),*)) => {
+        impl<$($ty_param: KernelParam),*> Kernel<($($ty_param),*,)> {
+            pub fn launch(
+                &self,
+                launch_params: LaunchParams,
+                params: ($($ty_param),*,),
+            ) -> Result<()> {
+                match self {
+                    Self::Cuda(kernel) => Ok(kernel.launch(launch_params.into(), params)?),
+                    Self::Hip(kernel) => Ok(kernel.launch(launch_params.into(), params)?),
+                }
+            }
+        }
+    };
+}
+
+impl_kernel!((T1), (0));
+impl_kernel!((T1, T2), (0, 1));
+impl_kernel!((T1, T2, T3), (0, 1, 2));
+impl_kernel!((T1, T2, T3, T4), (0, 1, 2, 3));
+impl_kernel!((T1, T2, T3, T4, T5), (0, 1, 2, 3, 4));
+impl_kernel!((T1, T2, T3, T4, T5, T6), (0, 1, 2, 3, 4, 5));
+impl_kernel!((T1, T2, T3, T4, T5, T6, T7), (0, 1, 2, 3, 4, 5, 6));
+impl_kernel!((T1, T2, T3, T4, T5, T6, T7, T8), (0, 1, 2, 3, 4, 5, 6, 7));
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
+);
+impl_kernel!(
+    (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+);
+impl_kernel!(
+    (
+        T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20,
+        T21
+    ),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+);
+impl_kernel!(
+    (
+        T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20,
+        T21, T22
+    ),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21)
+);
+impl_kernel!(
+    (
+        T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20,
+        T21, T22, T23
+    ),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)
+);
+impl_kernel!(
+    (
+        T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20,
+        T21, T22, T23, T24
+    ),
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23)
+);

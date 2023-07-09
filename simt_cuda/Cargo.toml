@@ -1,6 +1,6 @@
 [package]
 name = "simt_cuda"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 description = "part of simt. cuda backend"
@@ -8,5 +8,6 @@ authors = ["Mack Straight <mack@str.rs>"]
 
 [dependencies]
 half = "2.3.1"
-simt_cuda_sys = { version = "0.1.2", path = "../simt_cuda_sys" }
+simt_core = { version = "0.2", path = "../simt_core" }
+simt_cuda_sys = { version = "0.2", path = "../simt_cuda_sys" }
 thiserror = "1"

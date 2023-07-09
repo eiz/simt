@@ -1,11 +1,8 @@
 use alloc::{ffi::CString, sync::Arc};
-use core::{
-    cell::RefCell,
-    ffi::{c_void, CStr},
-    marker::PhantomData,
-};
-use half::f16;
+use core::{cell::RefCell, ffi::CStr, marker::PhantomData};
 use std::sync::Once;
+
+use simt_core::KernelParam;
 use thiserror::Error;
 
 extern crate alloc;
@@ -317,39 +314,19 @@ impl Drop for HipStream {
 }
 
 #[derive(Default, Clone)]
-pub struct LaunchParams<'a> {
+pub struct HipLaunchParams<'a> {
     pub blocks: (u32, u32, u32),
     pub threads: (u32, u32, u32),
     pub shared_mem: u32,
     pub stream: Option<&'a HipStream>,
 }
 
-pub trait KernelParam {
-    fn to_launch_arg(&self) -> *mut c_void {
-        self as *const _ as *mut _
-    }
-}
-
-impl<T: KernelParam> KernelParam for *mut T {}
-impl<T: KernelParam> KernelParam for *const T {}
-impl KernelParam for f16 {}
-impl KernelParam for f32 {}
-impl KernelParam for f64 {}
-impl KernelParam for u8 {}
-impl KernelParam for u16 {}
-impl KernelParam for u32 {}
-impl KernelParam for u64 {}
-impl KernelParam for i8 {}
-impl KernelParam for i16 {}
-impl KernelParam for i32 {}
-impl KernelParam for i64 {}
-
-pub struct Kernel<T> {
+pub struct HipKernel<T> {
     ptr: simt_hip_sys::hipFunction_t,
     _dead: PhantomData<T>,
 }
 
-impl<T> Kernel<T> {
+impl<T> HipKernel<T> {
     pub fn new(module: &HipModule, name: &str) -> Result<Self> {
         let hip = simt_hip_sys::library();
         let c_name = CString::new(name).map_err(|_| Error::InvalidKernelName)?;
@@ -371,10 +348,10 @@ impl<T> Kernel<T> {
 // that would be mildly inconvenient
 macro_rules! impl_kernel {
     (($($ty_param:ident),*), ($($ty_idx:tt),*)) => {
-        impl<$($ty_param: KernelParam),*> Kernel<($($ty_param),*,)> {
+        impl<$($ty_param: KernelParam),*> HipKernel<($($ty_param),*,)> {
             pub fn launch(
                 &self,
-                launch_params: LaunchParams,
+                launch_params: HipLaunchParams,
                 params: ($($ty_param),*,),
             ) -> Result<()> {
                 let hip = simt_hip_sys::library();

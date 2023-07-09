@@ -1,6 +1,6 @@
 [package]
 name = "simt_rocblas_sys"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "part of simt. rocBLAS api bindings"
 authors = ["Mack Straight <mack@str.rs>"]

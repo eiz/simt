@@ -1,9 +1,0 @@
-[package]
-name = "simt_vulkan"
-version = "0.1.0"
-edition = "2021"
-license = "MIT"
-description = "part of simt. vulkan backend"
-authors = ["Mack Straight <mack@str.rs>"]
-
-[dependencies]
