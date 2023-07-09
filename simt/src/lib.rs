@@ -67,6 +67,13 @@ pub enum PhysicalGpu {
 }
 
 impl PhysicalGpu {
+    pub fn any() -> Option<Self> {
+        CudaPhysicalDevice::get(0)
+            .ok()
+            .map(Self::Cuda)
+            .or_else(|| HipPhysicalDevice::get(0).ok().map(Self::Hip))
+    }
+
     pub fn count(api: ComputeApi) -> Result<i32> {
         match api {
             ComputeApi::Cuda => Ok(CudaPhysicalDevice::count()?),
