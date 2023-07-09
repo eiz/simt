@@ -259,10 +259,10 @@ impl CudaModule {
         let cuda = simt_cuda_sys::library();
         let mut compatible_kernels = vec![];
         for (arch, bin) in kernels {
-            if !arch.starts_with("sm") {
+            if !arch.starts_with("sm_") {
                 continue;
             }
-            let arch = arch[2..].parse::<i32>().unwrap_or(0x7FFF_FFFF);
+            let arch = arch[3..].parse::<i32>().unwrap_or(0x7FFF_FFFF);
             if arch <= capability {
                 compatible_kernels.push((arch, bin));
             }
