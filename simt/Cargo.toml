@@ -7,3 +7,8 @@ description = "simple simt compute support for rust"
 authors = ["Mack Straight <mack@str.rs>"]
 
 [dependencies]
+simt_cuda = { version = "0.1.1", path = "../simt_cuda" }
+simt_cuda_sys = { version = "0.1.2", path = "../simt_cuda_sys" }
+simt_hip = { version = "0.1.6", path = "../simt_hip" }
+simt_hip_sys = { version = "0.1.2", path = "../simt_hip_sys" }
+thiserror = "1"

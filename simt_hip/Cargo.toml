@@ -8,5 +8,5 @@ authors = ["Mack Straight <mack@str.rs>"]
 
 [dependencies]
 half = "2.3.1"
-simt_hip_sys = "0.1.2"
+simt_hip_sys = { version = "0.1.2", path = "../simt_hip_sys" }
 thiserror = "1"

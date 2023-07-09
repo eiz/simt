@@ -160,7 +160,7 @@ impl Drop for CudaDevice {
 
 // exercise for the reader: make get() not have to return a clone
 thread_local! {
-    static THREAD_HIP_CONTEXT: RefCell<Option<Arc<CudaDevice>>> = RefCell::new(None);
+    static THREAD_CUDA_CONTEXT: RefCell<Option<Arc<CudaDevice>>> = RefCell::new(None);
 }
 
 pub struct ScopedCudaDevice {
@@ -169,11 +169,11 @@ pub struct ScopedCudaDevice {
 
 impl ScopedCudaDevice {
     fn new(value: Arc<CudaDevice>) -> Result<Self> {
-        let hip = simt_cuda_sys::library();
-        let old_value = THREAD_HIP_CONTEXT.with(|v| -> Result<Option<Arc<CudaDevice>>> {
+        let cuda = simt_cuda_sys::library();
+        let old_value = THREAD_CUDA_CONTEXT.with(|v| -> Result<Option<Arc<CudaDevice>>> {
             let mut v = v.borrow_mut();
             let old_value = v.clone();
-            unsafe { cuda_call(|| hip.cuCtxPushCurrent_v2(value.context))? }
+            unsafe { cuda_call(|| cuda.cuCtxPushCurrent_v2(value.context))? }
             *v = Some(value);
             Ok(old_value)
         })?;
@@ -181,7 +181,7 @@ impl ScopedCudaDevice {
     }
 
     pub fn get() -> Result<Arc<CudaDevice>> {
-        THREAD_HIP_CONTEXT
+        THREAD_CUDA_CONTEXT
             .with(|v| v.borrow().clone())
             .ok_or(Error::Cuda(
                 simt_cuda_sys::CUresult::CUDA_ERROR_INVALID_CONTEXT,
@@ -191,7 +191,7 @@ impl ScopedCudaDevice {
 
 impl Drop for ScopedCudaDevice {
     fn drop(&mut self) {
-        THREAD_HIP_CONTEXT.with(|v| {
+        THREAD_CUDA_CONTEXT.with(|v| {
             let mut v = v.borrow_mut();
             let cuda = simt_cuda_sys::library();
             unsafe {
