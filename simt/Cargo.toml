@@ -1,6 +1,6 @@
 [package]
 name = "simt"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 license = "MIT"
 description = "simple simt compute support for rust"
@@ -8,9 +8,9 @@ authors = ["Mack Straight <mack@str.rs>"]
 repository = "https://github.com/eiz/simt"
 
 [dependencies]
-simt_core = { version = "0.2", path = "../simt_core" }
-simt_cuda = { version = "0.2", path = "../simt_cuda" }
-simt_cuda_sys = { version = "0.2", path = "../simt_cuda_sys" }
-simt_hip = { version = "0.2", path = "../simt_hip" }
-simt_hip_sys = { version = "0.2", path = "../simt_hip_sys" }
+simt_core = { version = "0.2.0", path = "../simt_core" }
+simt_cuda = { version = "0.2.1", path = "../simt_cuda" }
+simt_cuda_sys = { version = "0.2.0", path = "../simt_cuda_sys" }
+simt_hip = { version = "0.2.0", path = "../simt_hip" }
+simt_hip_sys = { version = "0.2.0", path = "../simt_hip_sys" }
 thiserror = "1"

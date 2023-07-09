@@ -122,7 +122,7 @@ impl CudaPhysicalDevice {
                     self.0,
                 )
             })?;
-            Ok(major * 100 + minor)
+            Ok(major * 10 + minor)
         }
     }
 }
