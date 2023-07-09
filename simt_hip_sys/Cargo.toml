@@ -5,6 +5,7 @@ edition = "2021"
 description = "part of simt. hip driver api bindings"
 authors = ["Mack Straight <mack@str.rs>"]
 license = "MIT"
+repository = "https://github.com/eiz/simt"
 
 [dependencies]
 libloading = "0.8.0"

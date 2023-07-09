@@ -5,6 +5,7 @@ edition = "2021"
 license = "MIT"
 description = "simple simt compute support for rust"
 authors = ["Mack Straight <mack@str.rs>"]
+repository = "https://github.com/eiz/simt"
 
 [dependencies]
 simt_core = { version = "0.2", path = "../simt_core" }

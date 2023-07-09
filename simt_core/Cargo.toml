@@ -5,6 +5,7 @@ edition = "2021"
 license = "MIT"
 description = "part of simt. shared types between backends"
 authors = ["Mack Straight <mack@str.rs>"]
+repository = "https://github.com/eiz/simt"
 
 [dependencies]
 half = "2.3.1"
